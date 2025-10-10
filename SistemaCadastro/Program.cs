@@ -32,7 +32,7 @@ builder.Services.AddSingleton(new CustomLoggerProviderConfiguration
     LogToFile = true
 });
 
-builder.Services.AddSingleton<ILoggerProvider, CustomLoggerProvider>();
+//builder.Services.AddSingleton<ILoggerProvider, CustomLoggerProvider>();
 
 // Adiciona o filtro global
 builder.Services.AddScoped<APILoggingFilter>();
