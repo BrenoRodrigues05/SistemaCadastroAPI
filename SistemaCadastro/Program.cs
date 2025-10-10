@@ -1,7 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using SistemaCadastro.Context;
+using SistemaCadastro.DTOs;
 using SistemaCadastro.Filters;
+using SistemaCadastro.Interfaces;
 using SistemaCadastro.Logging;
+using SistemaCadastro.Mappings;
 using SistemaCadastro.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +22,7 @@ builder.Services.AddSwaggerGen();
 // Injeções de dependência
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ICadastroRepository, CadastroRepository>();
+builder.Services.AddScoped<CadastroMapper>();
 
 // Configuração de log
 builder.Logging.ClearProviders();

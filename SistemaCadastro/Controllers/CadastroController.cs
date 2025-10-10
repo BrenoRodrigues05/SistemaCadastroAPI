@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using SistemaCadastro.DTOs;
+using SistemaCadastro.Mappings;
 using SistemaCadastro.Models;
 using SistemaCadastro.Repositories;
 
@@ -11,24 +12,25 @@ namespace SistemaCadastro.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<CadastroController> _logger;
+        private readonly CadastroMapper _mapper;
 
-        public CadastroController(IUnitOfWork unitOfWork, ILogger<CadastroController> logger)
+        public CadastroController(IUnitOfWork unitOfWork, ILogger<CadastroController> logger, CadastroMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _mapper = mapper;
         }
-       
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Cadastro>>> GetAll()
+        public async Task<ActionResult<IEnumerable<CadastroReadDTO>>> GetAll()
         {
             var cadastros = await _unitOfWork.CadastroRepository.GetAllAsync();
-            return Ok(cadastros);
+            var dtos = cadastros.Select(c => _mapper.ToReadDTO(c));
+            return Ok(dtos);
         }
 
-        
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<Cadastro>> GetById(int id)
+        public async Task<ActionResult<CadastroReadDTO>> GetById(int id)
         {
             var cadastro = await _unitOfWork.CadastroRepository.GetByIdAsync(id);
             if (cadastro == null)
@@ -37,60 +39,57 @@ namespace SistemaCadastro.Controllers
                 return NotFound(new { Message = $"Cadastro com ID {id} não encontrado." });
             }
 
-            return Ok(cadastro);
+            return Ok(_mapper.ToReadDTO(cadastro));
         }
 
-        [HttpGet("cpf/{Cpf}")]
-        public async Task<ActionResult<Cadastro>> GetByCpf(string Cpf)
+        [HttpGet("cpf/{cpf}")]
+        public async Task<ActionResult<CadastroReadDTO>> GetByCpf(string cpf)
         {
             var cadastros = await _unitOfWork.CadastroRepository.GetAllAsync();
-            var cadastro = cadastros.FirstOrDefault(c => c.Cpf == Cpf);
+            var cadastro = cadastros.FirstOrDefault(c => c.Cpf == cpf);
 
             if (cadastro == null)
             {
-                _logger.LogWarning("Cadastro com CPF {Cpf} não encontrado.", Cpf);
-                return NotFound(new { Message = $"Cadastro com CPF {Cpf} não encontrado." });
+                _logger.LogWarning("Cadastro com CPF {Cpf} não encontrado.", cpf);
+                return NotFound(new { Message = $"Cadastro com CPF {cpf} não encontrado." });
             }
 
-            _logger.LogInformation("Cadastro encontrado por CPF: {Cpf}", Cpf);
-            return Ok(cadastro);
+            _logger.LogInformation("Cadastro encontrado por CPF: {Cpf}", cpf);
+            return Ok(_mapper.ToReadDTO(cadastro));
         }
 
         [HttpPost]
-        public async Task<ActionResult> Create([FromBody] Cadastro cadastro)
+        public async Task<ActionResult<CadastroReadDTO>> Create([FromBody] CadastroCreateDTO dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (await _unitOfWork.CadastroRepository.GetByCpf(cadastro.Cpf!))
+            if (await _unitOfWork.CadastroRepository.GetByCpf(dto.Cpf!))
                 return BadRequest(new { Message = "CPF já cadastrado no sistema." });
 
+            var cadastro = _mapper.ToEntity(dto);
             await _unitOfWork.CadastroRepository.AddAsync(cadastro);
             await _unitOfWork.CommitAsync();
 
             _logger.LogInformation("Novo cadastro criado: {Cpf}", cadastro.Cpf);
-            return CreatedAtAction(nameof(GetById), new { id = cadastro.Id }, cadastro);
+            return CreatedAtAction(nameof(GetById), new { id = cadastro.Id }, _mapper.ToReadDTO(cadastro));
         }
 
-        
         [HttpPut("{id:int}")]
-        public async Task<ActionResult> Update(int id, [FromBody] Cadastro cadastro)
+        public async Task<ActionResult> Update(int id, [FromBody] CadastroCreateDTO dto)
         {
-            if (id != cadastro.Id)
-                return BadRequest(new { Message = "O ID do cadastro não corresponde ao informado na URL." });
-
-            var existingCadastro = await _unitOfWork.CadastroRepository.GetByIdAsync(id);
-            if (existingCadastro == null)
+            var existing = await _unitOfWork.CadastroRepository.GetByIdAsync(id);
+            if (existing == null)
                 return NotFound(new { Message = $"Cadastro com ID {id} não encontrado." });
 
-            _unitOfWork.CadastroRepository.UpdateAsync(cadastro);
+            _mapper.MapToEntity(dto, existing);
+            await _unitOfWork.CadastroRepository.UpdateAsync(existing);
             await _unitOfWork.CommitAsync();
 
-            _logger.LogInformation("Cadastro atualizado: {Cpf}", cadastro.Cpf);
+            _logger.LogInformation("Cadastro atualizado: {Cpf}", existing.Cpf);
             return NoContent();
         }
 
-       
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> Delete(int id)
         {
@@ -106,4 +105,3 @@ namespace SistemaCadastro.Controllers
         }
     }
 }
-
