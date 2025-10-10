@@ -2,25 +2,29 @@ using Microsoft.EntityFrameworkCore;
 using SistemaCadastro.Context;
 using SistemaCadastro.Filters;
 using SistemaCadastro.Logging;
+using SistemaCadastro.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//  Configura o DbContext
+// Configura o DbContext e String de conexão com MySQL
 var mysqlConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<SistemaCadastroContext>(options =>
     options.UseMySql(mysqlConnectionString, ServerVersion.AutoDetect(mysqlConnectionString)));
 
-//  Configurações básicas
+// Configurações básicas
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//  Configuração de log
+// Injeções de dependência
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<ICadastroRepository, CadastroRepository>();
+
+// Configuração de log
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
-//  Aqui está a correção
-builder.Services.AddSingleton<CustomLoggerProviderConfiguration>(new CustomLoggerProviderConfiguration
+builder.Services.AddSingleton(new CustomLoggerProviderConfiguration
 {
     LogLevel = LogLevel.Information,
     LogFilePath = "Logs/sistema-cadastro.log",
@@ -30,7 +34,7 @@ builder.Services.AddSingleton<CustomLoggerProviderConfiguration>(new CustomLogge
 
 builder.Services.AddSingleton<ILoggerProvider, CustomLoggerProvider>();
 
-//  Adiciona o filtro global
+// Adiciona o filtro global
 builder.Services.AddScoped<APILoggingFilter>();
 builder.Services.AddControllers(options =>
 {
@@ -39,7 +43,7 @@ builder.Services.AddControllers(options =>
 
 var app = builder.Build();
 
-//  Middlewares padrão
+// Middlewares padrão
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -48,6 +52,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
+
 app.MapControllers();
 
 app.Run();
