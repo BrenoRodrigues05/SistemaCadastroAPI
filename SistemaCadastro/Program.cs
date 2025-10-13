@@ -43,7 +43,7 @@ builder.Services.AddScoped<APILoggingFilter>();
 builder.Services.AddControllers(options =>
 {
     options.Filters.AddService<APILoggingFilter>();
-});
+}).AddNewtonsoftJson();
 
 var app = builder.Build();
 

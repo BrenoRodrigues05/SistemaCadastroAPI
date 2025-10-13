@@ -103,5 +103,50 @@ namespace SistemaCadastro.Controllers
             _logger.LogInformation("Cadastro removido: {Cpf}", cadastro.Cpf);
             return NoContent();
         }
+
+        [HttpPatch("{id:int}")]
+        public async Task<ActionResult> Patch(int id, [FromBody] CadastroPatchDTO dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var cadastro = await _unitOfWork.CadastroRepository.GetByIdAsync(id);
+            if (cadastro == null)
+            {
+                _logger.LogWarning("Tentativa de atualização parcial em cadastro inexistente. ID: {Id}", id);
+                return NotFound(new { Message = $"Cadastro com ID {id} não encontrado." });
+            }
+
+            // Atualiza apenas os campos não nulos do DTO
+            if (!string.IsNullOrWhiteSpace(dto.Cpf))
+                cadastro.Cpf = dto.Cpf;
+
+            if (!string.IsNullOrWhiteSpace(dto.Nome))
+                cadastro.Nome = dto.Nome;
+
+            if (!string.IsNullOrWhiteSpace(dto.Email))
+                cadastro.Email = dto.Email;
+
+            if (!string.IsNullOrWhiteSpace(dto.Telefone))
+                cadastro.Telefone = dto.Telefone;
+
+            if (dto.Nascimento != default)
+                cadastro.Nascimento = dto.Nascimento;
+
+            if (!string.IsNullOrWhiteSpace(dto.Estado))
+                cadastro.Estado = dto.Estado;
+
+            if (!string.IsNullOrWhiteSpace(dto.Cidade))
+                cadastro.Cidade = dto.Cidade;
+
+            if (!string.IsNullOrWhiteSpace(dto.Cargo))
+                cadastro.Cargo = dto.Cargo;
+
+            await _unitOfWork.CadastroRepository.UpdateAsync(cadastro);
+            await _unitOfWork.CommitAsync();
+
+            _logger.LogInformation("Cadastro parcialmente atualizado: {Cpf}", cadastro.Cpf);
+            return Ok(_mapper.ToReadDTO(cadastro));
+        }
     }
 }
