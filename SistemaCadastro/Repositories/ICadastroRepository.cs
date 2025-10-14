@@ -1,4 +1,5 @@
 ﻿using SistemaCadastro.Models;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace SistemaCadastro.Repositories
 {
@@ -11,5 +12,8 @@ namespace SistemaCadastro.Repositories
         Task RemoveAsync(int id);
 
         Task<bool> GetByCpf(string cpf);
+
+        // Método para paginação e filtros
+        IQueryable<Cadastro> Query();
     }
 }

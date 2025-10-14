@@ -2,6 +2,7 @@
 using SistemaCadastro.DTOs;
 using SistemaCadastro.Mappings;
 using SistemaCadastro.Models;
+using SistemaCadastro.Pagination;
 using SistemaCadastro.Repositories;
 
 namespace SistemaCadastro.Controllers
@@ -147,6 +148,33 @@ namespace SistemaCadastro.Controllers
 
             _logger.LogInformation("Cadastro parcialmente atualizado: {Cpf}", cadastro.Cpf);
             return Ok(_mapper.ToReadDTO(cadastro));
+        }
+
+        [HttpGet("paginado")]
+        public async Task<ActionResult<PagedResult<CadastroReadDTO>>> GetPaged(
+            [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            if (pageNumber <= 0 || pageSize <= 0)
+                return BadRequest(new { Message = "Os parâmetros pageNumber e pageSize " +
+                    "devem ser maiores que zero." });
+
+            var query = _unitOfWork.CadastroRepository.Query();
+
+            // Pagina usando o helper
+            var paged = await PaginationHelper.GetPagedResultAsync(query, pageNumber, pageSize);
+
+            // Mapeia para DTOs
+            var dtoList = paged.Items.Select(c => _mapper.ToReadDTO(c));
+
+            var result = new PagedResult<CadastroReadDTO>
+            {
+                Items = dtoList,
+                TotalItems = paged.TotalItems,
+                PageNumber = paged.PageNumber,
+                PageSize = paged.PageSize
+            };
+
+            return Ok(result);
         }
     }
 }

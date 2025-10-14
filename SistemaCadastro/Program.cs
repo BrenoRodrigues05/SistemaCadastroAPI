@@ -6,6 +6,7 @@ using SistemaCadastro.Interfaces;
 using SistemaCadastro.Logging;
 using SistemaCadastro.Mappings;
 using SistemaCadastro.Repositories;
+using SistemaCadastro.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +24,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ICadastroRepository, CadastroRepository>();
 builder.Services.AddScoped<CadastroMapper>();
+builder.Services.AddScoped<CadastroService>();
 
 // Configuração de log
 builder.Logging.ClearProviders();

@@ -50,5 +50,11 @@ namespace SistemaCadastro.Repositories
         {
             return await _context.Cadastros.AnyAsync(c => c.Cpf == cpf);
         }
+
+        // Método para consultas com paginação
+        public IQueryable<Cadastro> Query()
+        {
+            return _context.Cadastros.AsQueryable();
+        }
     }
 }
