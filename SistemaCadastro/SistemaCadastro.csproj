@@ -4,6 +4,9 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+	  <NoWarn>$(NoWarn);1591</NoWarn>
+    <DocumentationFile>C:\Users\CSM\Desktop\CURSOS\CSharp\SistemaCadastro\SistemaCadastro\bin\Debug\net8.0\SistemaCadastro.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,6 +18,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="OpenXmlPowerTools" Version="4.5.3.2" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>

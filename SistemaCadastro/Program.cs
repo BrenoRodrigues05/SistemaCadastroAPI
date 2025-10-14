@@ -1,4 +1,6 @@
+using DocumentFormat.OpenXml;
 using Microsoft.EntityFrameworkCore;
+using OpenXmlPowerTools;
 using SistemaCadastro.Context;
 using SistemaCadastro.DTOs;
 using SistemaCadastro.Filters;
@@ -7,6 +9,7 @@ using SistemaCadastro.Logging;
 using SistemaCadastro.Mappings;
 using SistemaCadastro.Repositories;
 using SistemaCadastro.Services;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +21,30 @@ builder.Services.AddDbContext<SistemaCadastroContext>(options =>
 // Configurações básicas
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+// Configuração do Swagger para documentação da API
+
+builder.Services.AddSwaggerGen(c => { 
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Version = "v1",
+        Title = "Sistema de Cadastro API",
+        Description = "API para gerenciamento de cadastros de usuários.",
+        TermsOfService = new Uri("https://example.com/terms"),
+        Contact = new Microsoft.OpenApi.Models.OpenApiContact
+        {
+            Name = "Suporte API",
+            Url = new Uri("https://example.com/support")
+        }
+
+    });
+    // Caminho do arquivo XML gerado pela documentação
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+
+    // Inclui os comentários XML no Swagger
+    c.IncludeXmlComments(xmlPath);
+    });
 
 // Injeções de dependência
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
