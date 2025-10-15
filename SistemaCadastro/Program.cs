@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using OpenXmlPowerTools;
 using SistemaCadastro.Context;
 using SistemaCadastro.DTOs;
+using SistemaCadastro.Extensions;
 using SistemaCadastro.Filters;
 using SistemaCadastro.Interfaces;
 using SistemaCadastro.Logging;
@@ -80,6 +81,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.ConfigureExceptionHandler();
 }
 
 app.UseHttpsRedirection();
