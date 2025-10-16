@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SistemaCadastro.DTOs;
 using SistemaCadastro.Mappings;
 using SistemaCadastro.Models;
@@ -12,6 +13,7 @@ namespace SistemaCadastro.Controllers
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CadastroController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -250,5 +252,6 @@ namespace SistemaCadastro.Controllers
                 PageSize = paged.PageSize
             });
         }
+
     }
 }
