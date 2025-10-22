@@ -84,8 +84,6 @@ builder.Services.AddScoped<CadastroService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 
 // Autenticação e Autorização com JWT
-
-builder.Services.AddAuthorization();
     
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<SistemaCadastroContext>()
@@ -152,12 +150,29 @@ builder.Services.AddControllers(options =>
     options.Filters.AddService<APILoggingFilter>();
 }).AddNewtonsoftJson();
 
+// Cors
+
+var OrigensComAcesso = "origenscomacesso";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: OrigensComAcesso,
+                      policy =>
+                      {
+                          policy.AllowAnyOrigin()
+                                .AllowAnyMethod()
+                                .AllowAnyHeader();
+                      });
+});
+
 var app = builder.Build();
 
 // Middleware customizado para tratamento de erros
 app.ConfigureExceptionHandler();
 
 app.UseHttpsRedirection();
+
+app.UseCors(OrigensComAcesso);
 
 // Middlewares padrão
 if (app.Environment.IsDevelopment())
